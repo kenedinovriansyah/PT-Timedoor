@@ -10,6 +10,10 @@
         "production": "mix --production"
     },
     "devDependencies": {
+        "@babel/plugin-proposal-decorators": "^7.14.5",
+        "@babel/plugin-transform-typescript": "^7.14.6",
+        "@babel/preset-typescript": "^7.14.5",
+        "@vue/babel-preset-app": "^4.5.13",
         "axios": "^0.21",
         "bootstrap": "^4.6.0",
         "html-loader": "^2.1.2",
@@ -27,5 +31,9 @@
         "vue": "^2.6.12",
         "vue-loader": "^15.9.6",
         "vue-template-compiler": "^2.6.14"
+    },
+    "dependencies": {
+        "vue-class-component": "^7.2.6",
+        "vue-property-decorator": "^9.1.2"
     }
 }
