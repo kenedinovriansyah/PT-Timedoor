@@ -1,0 +1,143 @@
+@import url("https://use.fontawesome.com/releases/v5.15.3/css/all.css");
+@import url("https://fonts.googleapis.com/css2?family=Inter&family=Kanit&family=Lato:wght@900&family=Open+Sans&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Public+Sans&display=swap");
+.home {
+  background-color: white;
+  padding: 10px;
+}
+
+.grids {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.card {
+  margin: 5px;
+  width: 320px;
+  background-color: white;
+  border-radius: 10px;
+  overflow: hidden;
+  transition: 500ms ease-in-out;
+  border: none;
+  cursor: pointer;
+}
+.card:hover {
+  box-shadow: rgba(0, 0, 0, 0.07) 0px 4px 6px -1px;
+  -webkit-box-shadow: rgba(0, 0, 0, 0.07) 0px 4px 6px -1px;
+  -moz-box-shadow: rgba(0, 0, 0, 0.07) 0px 4px 6px -1px;
+  border: solid 1px #c9d1d9;
+}
+.card .card-image {
+  width: 100%;
+}
+.card .card-image img {
+  width: 100%;
+  height: 260px;
+  background-size: 100% 100%;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+.card .card-body {
+  display: flex;
+  flex-direction: column;
+}
+.card .card-body .name,
+.card .card-body .description {
+  font-family: "Public Sans", sans-serif;
+  text-align: center;
+}
+.card .card-body .name {
+  font-size: 16px;
+}
+.card .card-body .description {
+  font-size: 13.333px;
+  color: rgba(49, 53, 59, 0.68);
+}
+.card .card-body .pick-size {
+  position: relative;
+  text-align: center;
+  font-family: "Kanit", sans-serif;
+}
+.card .card-body .pick-size span {
+  background-color: white;
+  z-index: 2;
+  position: relative;
+  padding: 0px 10px 0px 10px;
+  color: #2d2b2d;
+  cursor: default;
+}
+.card .card-body .pick-size::before {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 1px;
+  background-color: #e4e4e4;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+.card .card-footer .groups {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+}
+.card .card-footer .groups .group {
+  display: flex;
+  align-items: center;
+}
+.card .card-footer .groups .group .box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  width: 40px;
+  height: 40px;
+  background-color: white;
+  box-shadow: rgba(0, 0, 0, 0.07) 0px 4px 6px -1px;
+  -webkit-box-shadow: rgba(0, 0, 0, 0.07) 0px 4px 6px -1px;
+  -moz-box-shadow: rgba(0, 0, 0, 0.07) 0px 4px 6px -1px;
+  border-radius: 100%;
+  font-size: 13px;
+  line-height: 12px;
+  font-family: "Kanit", sans-serif;
+  margin: 0px 5px 0px 0px;
+  cursor: pointer;
+  transition: 500ms ease-in-out;
+}
+.card .card-footer .groups .group .box:hover {
+  background-color: #00ab55;
+  color: white;
+}
+.card .card-footer .groups .group .price {
+  font-family: "Public Sans", sans-serif;
+  font-size: 12px;
+}
+.card .card-footer .card-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 15px 0px 0px 0px;
+}
+.card .card-footer .card-button button {
+  width: 200px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: white;
+  border-radius: 30px;
+  border: none;
+  outline: none;
+  background-color: rgba(0, 171, 85, 0.08);
+  color: #00ab55;
+  font-family: "Kanit", sans-serif;
+  transition: 500ms ease-in-out;
+}
+.card .card-footer .card-button button:hover {
+  background-color: #00ab55;
+  color: white;
+}
+
+/*# sourceMappingURL=index.css.map */

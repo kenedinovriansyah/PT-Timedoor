@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
+      crossorigin="anonymous"
+    />
+    <link rel="stylesheet" href="./index.css" />
+    <title>Document</title>
+  </head>
+  <body>
+    <div>
+      <div class="grids" id="list"></div>
+    </div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"
+      integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js"
+      integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF"
+      crossorigin="anonymous"
+    ></script>
+    <script>
+      const product = [
+        {
+          name: "Italino Original",
+          description:
+            "Although the legendary Double Burger really needs no introduction, please allow us... Tucked in between three soft buns are two all-beef patties, cheddar cheese, ketchup, onion, pickles and iceberg lettuce. Hesburger’s own paprika and cucumber mayonnaise add the crowning touch. Oh baby!",
+          short_description:
+            "Extra-virgin olive oil, garlic, mozzarella, mushrooms and olives.",
+          img: "https://ths.cafe/wp-content/uploads/2021/01/THS-Special-Pizza-The-Hunger-Solution.png",
+          cost: [
+            {
+              name: "cm",
+              size: 22,
+              price: 8,
+            },
+            {
+              name: "cm",
+              size: 29,
+              price: 10,
+            },
+            {
+              name: "cm",
+              size: 32,
+              price: 12,
+            },
+          ],
+        },
+        {
+          name: "Chiken Hawaii",
+          description:
+            "Although the legendary Double Burger really needs no introduction, please allow us... Tucked in between three soft buns are two all-beef patties, cheddar cheese, ketchup, onion, pickles and iceberg lettuce. Hesburger’s own paprika and cucumber mayonnaise add the crowning touch. Oh baby!",
+          short_description:
+            "Extra-virgin olive oil, garlic, mozzarella, mushrooms and olives.",
+          img: "https://i.dlpng.com/static/png/6699618_preview.png",
+          cost: [
+            {
+              name: "cm",
+              size: 22,
+              price: 8,
+            },
+            {
+              name: "cm",
+              size: 29,
+              price: 10,
+            },
+            {
+              name: "cm",
+              size: 32,
+              price: 12,
+            },
+          ],
+        },
+        {
+          name: "Summer Pizza",
+          description:
+            "Although the legendary Double Burger really needs no introduction, please allow us... Tucked in between three soft buns are two all-beef patties, cheddar cheese, ketchup, onion, pickles and iceberg lettuce. Hesburger’s own paprika and cucumber mayonnaise add the crowning touch. Oh baby!",
+          short_description:
+            "Extra-virgin olive oil, garlic, mozzarella, mushrooms and olives.",
+          img: "https://www.pngall.com/wp-content/uploads/2016/05/Pizza-Download-PNG.png",
+          cost: [
+            {
+              name: "cm",
+              size: 22,
+              price: 8,
+            },
+            {
+              name: "cm",
+              size: 29,
+              price: 10,
+            },
+            {
+              name: "cm",
+              size: 32,
+              price: 12,
+            },
+          ],
+        },
+      ];
+      for (let i = 0; i < product.length; i++) {
+        const card = document.createElement("div");
+        card_image = document.createElement("div");
+        image = document.createElement("img");
+        image.src = product[i].img;
+        card_image.className = "card-image";
+        card_image.appendChild(image);
+
+        card_body = document.createElement("div");
+        card_name = document.createElement("span");
+        card_body.className = "card-body";
+        card_name.innerHTML = product[i].name;
+        card_name.className = "name";
+        card_desc = document.createElement("span");
+        card_desc.className = "description";
+        card_desc.innerHTML = product[i].short_description;
+        pick = document.createElement("div");
+        pick.className = "pick-size";
+        pick.innerHTML = "Pick Size";
+        card_body.appendChild(card_name);
+        card_body.appendChild(card_desc);
+        card_body.appendChild(pick);
+
+        card_footer = document.createElement("div");
+        card_footer.className = "card-footer";
+
+        groups = document.createElement("div");
+        groups.className = "groups";
+        for (let j = 0; j < product[i].cost.length; j++) {
+          group = document.createElement("div");
+          group.className = "group";
+          size = document.createElement("span");
+          size.innerHTML = product[i].cost[j].size;
+          cm = document.createElement("span");
+          cm.innerHTML = product[i].cost[j].name;
+          box = document.createElement("div");
+          box.className = "box";
+          price = document.createElement("div");
+          price.className = "price";
+          price.innerHTML = `$${product[i].cost[j].price}`;
+          box.appendChild(size);
+          box.appendChild(cm);
+          group.appendChild(box);
+          group.appendChild(price);
+          groups.appendChild(group);
+        }
+        buttons = document.createElement("div");
+        buttons.className = "card-button";
+        btn = document.createElement("button");
+        btn.innerHTML = "Choice";
+        buttons.appendChild(btn);
+        card_footer.appendChild(groups);
+        card_footer.appendChild(buttons);
+
+        card.className = "card";
+        card.appendChild(card_image);
+        card.appendChild(card_body);
+        card.appendChild(card_footer);
+        const defaults = document.getElementById("list");
+        defaults.appendChild(card);
+      }
+    </script>
+  </body>
+</html>
