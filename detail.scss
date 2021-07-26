@@ -1,0 +1,188 @@
+$font-family-Inter: "Inter", sans-serif;
+$font-family-Kanit: "Kanit", sans-serif;
+$font-family-Lato: "Lato", sans-serif;
+$font-family-Open: "Open Sans", sans-serif;
+$font-family-Public: "Public Sans", sans-serif;
+
+$white: rgba(255, 255, 255);
+$boxshadow-pedia: rgb(0 0 0 / 7%) 0px 4px 6px -1px;
+$boxshadow: 0px 0px 10px -7px rgba(0, 0, 0, 0.75);
+$boxshadow-button: rgb(0 171 85 / 24%) 0px 8px 16px 0px;
+$gray: #c9d1d9;
+$color: rgb(0, 171, 85);
+$text: rgba(49, 53, 59, 0.68);
+
+.detail {
+  padding: 2rem 0px 2rem 0px;
+}
+
+.grids {
+  display: flex;
+  justify-content: center;
+  padding: 4rem 0px 0px 0px;
+  .cols {
+    width: 100%;
+    padding: 0px 10px 0px 10px;
+    &:first-child {
+      max-width: 40%;
+    }
+    &:last-child {
+      max-width: 50%;
+    }
+    img {
+      width: 100%;
+      height: 100%;
+      background-size: 100% 100%;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+    h6 {
+      font-family: $font-family-Public;
+      margin: 0px;
+      padding: 0px;
+      margin: 10px 0px 10px 0px;
+    }
+  }
+}
+.piza-card {
+  .piza-card-header {
+    display: flex;
+    flex-direction: column;
+    .name,
+    .description {
+      font-family: $font-family-Public;
+    }
+    .name {
+      font-size: 18px;
+    }
+    .description {
+      color: $text;
+    }
+  }
+  .piza-card-body {
+    display: flex;
+    .piza-card-cols {
+      width: 100%;
+      max-width: 50%;
+      h6 {
+        padding: 15px 0px 0px 0px;
+        font-family: $font-family-Public;
+      }
+    }
+  }
+}
+
+ul {
+  list-style-type: none;
+  padding: 0px;
+  margin: 0px;
+  display: block;
+  li {
+    display: inline-block;
+    cursor: pointer;
+    .group {
+      display: flex;
+      align-items: center;
+      .box {
+        width: 15px;
+        height: 15px;
+        border-radius: 100%;
+        border: solid 1px #c9d1d9;
+        margin: 0px 5px 0px 0px;
+      }
+      .box.active {
+        background-color: $color;
+      }
+      color: $text;
+      width: 120px;
+      margin: 0px 5px 5px 0px;
+      font-family: $font-family-Public;
+      .box-s {
+        width: 46px;
+        height: 46px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        font-family: $font-family-Kanit;
+        line-height: 12px;
+        background-color: $white;
+        border-radius: 100%;
+        border: solid 1px rgb(0 171 85 / 24%);
+        margin: 0px 5px 0px 0px;
+        transition: 500ms ease-in-out;
+        &:hover {
+          background-color: $color;
+          color: $white;
+        }
+      }
+      .box-s.active {
+        background-color: $color;
+        color: $white;
+      }
+    }
+  }
+}
+.buttons {
+  display: flex;
+  align-items: center;
+  margin: 15px 0px 0px 0px;
+  #field-input {
+    width: 200px;
+    height: 40px;
+    box-shadow: $boxshadow-pedia;
+    -webkit-box-shadow: $boxshadow-pedia;
+    -moz-box-shadow: $boxshadow-pedia;
+    border-radius: 15px;
+    overflow: hidden;
+    margin: 0px 5px 0px 0px;
+    input {
+      width: 100%;
+      height: 100%;
+      border: none;
+      outline: none;
+      padding: 0px 15px 0px 15px;
+    }
+  }
+  button {
+    margin: 0px 0px 0px 5px;
+    width: 200px;
+    height: 40px;
+    border-radius: 30px;
+    background-color: rgb(0 171 85 / 24%);
+    color: $color;
+    font-family: $font-family-Kanit;
+    border: none;
+    outline: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+    .icons {
+      width: 20px;
+      height: 20px;
+      fill: $color;
+    }
+  }
+}
+
+.page-header {
+  padding: 0px 15px 0px 15px;
+  button {
+    width: 160px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+    border: none;
+    border-radius: 30px;
+    background-color: $color;
+    color: $white;
+    font-family: $font-family-Kanit;
+  }
+}
+
+.total {
+  font-family: $font-family-Public;
+  margin: 10px 0px 0px 0px;
+  font-size: 20px;
+}
