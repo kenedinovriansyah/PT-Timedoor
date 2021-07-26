@@ -1,5 +1,6 @@
 <template>
     <div>
+        <InfoContext />
         <router-view></router-view>
     </div>
 </template>
@@ -7,8 +8,13 @@
 <script lang="ts">
 import Vue from "vue";
 import { Component } from "vue-property-decorator";
+import InfoContext from "./context/info.context.vue";
 
-@Component({})
+@Component({
+    components: {
+        InfoContext
+    }
+})
 export default class BaseComponent extends Vue {}
 </script>
 

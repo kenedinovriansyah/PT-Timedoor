@@ -121,7 +121,7 @@
                                 min="1"
                             />
                         </div>
-                        <button>
+                        <button @click="addCart()">
                             <icons :src="cart" class="icons" />
                             <span>Add to cart</span>
                         </button>
@@ -140,12 +140,12 @@
 import Vue from "vue";
 import { Component } from "vue-property-decorator";
 import { mapGetters, mapState } from "vuex";
-import cart from "../media/new_icons/shop.svg";
+import cart from "../media/new_icons/shopping-cart.svg";
 
 @Component({
     computed: {
-        ...mapGetters(["defaults"]),
-        ...mapState(["defaultmodules"])
+        ...mapGetters(["defaults", "product"]),
+        ...mapState(["defaultmodules", "productmodules"])
     }
 })
 export default class DetailScreen extends Vue {
@@ -154,6 +154,7 @@ export default class DetailScreen extends Vue {
     total = 32;
     default_total = 32;
     defaultmodules: any;
+    productmodules: any;
     array = [
         { name: "Avocado", price: 1 },
         { name: "Broccoli", price: 1 },
@@ -190,6 +191,17 @@ export default class DetailScreen extends Vue {
             this.default_total = this.total + add;
             this.total = this.default_total;
         }
+    }
+
+    addCart() {
+        this.$store.commit("add", {
+            id: this.productmodules.cart.length + 1,
+            img:
+                "https://www.pngall.com/wp-content/uploads/2016/05/Pizza-Download-PNG.png",
+            name: "Pizza",
+            total: this.total,
+            quantity: this.quantity
+        });
     }
 
     clickrouter() {
