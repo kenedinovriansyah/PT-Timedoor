@@ -1,6 +1,6 @@
 <template>
-    <div class="detail">
-        <div class="page-header">
+    <div class="detail" v-if="product.data.name">
+        <div class="page-header" v-if="$route.name !== 'home'">
             <button @click="clickrouter()">
                 <i class="fas fa-arrow-left"></i>
                 <span>Back To Home</span>
@@ -8,15 +8,12 @@
         </div>
         <div class="grids">
             <div class="cols">
-                <img
-                    src="https://www.pngall.com/wp-content/uploads/2016/05/Pizza-Download-PNG.png"
-                    alt=""
-                />
+                <img :src="product.data.img" alt="" />
             </div>
             <div class="cols">
                 <div class="piza-card">
                     <div class="piza-card-header">
-                        <h2 class="name">Hawaii Vegetarian Pizza</h2>
+                        <h2 class="name">{{ product.data.name }}</h2>
                         <span class="description"
                             >Mouth watering pepperoni, cabanossi, mushroom,
                             capsicum, black olives and stretchy mozzarella,
@@ -124,7 +121,7 @@
                                 min="1"
                             />
                         </div>
-                        <button @click="addCart()">
+                        <button @click="addCart(product.data)">
                             <icons :src="cart" class="icons" />
                             <span>Add to cart</span>
                         </button>
@@ -143,6 +140,7 @@
 import Vue from "vue";
 import { Component } from "vue-property-decorator";
 import { mapGetters, mapState } from "vuex";
+import { Cart, Product } from "../../store/types/interface";
 import cart from "../media/new_icons/shopping-cart.svg";
 
 @Component({
@@ -158,7 +156,6 @@ export default class DetailScreen extends Vue {
     default_total = 32;
     defaultmodules: any;
     productmodules: any;
-    record = true;
     array = [
         { name: "Avocado", price: 1 },
         { name: "Broccoli", price: 1 },
@@ -201,20 +198,13 @@ export default class DetailScreen extends Vue {
             const filter = this.add.filter(function(x) {
                 return x.name === context.name;
             })[0];
-            const t_quan = filter.price * this.quantity;
-            this.default_total = this.default_total - t_quan;
+            const t_q = filter.price * this.quantity;
+            this.total = this.total - t_q;
             this.add = this.add.filter(function(x) {
                 if (x.name !== context.name) {
                     return x;
                 }
             });
-            if (this.add[0]) {
-                this.total = this.default_total;
-            } else {
-                this.default_total = this.defaultmodules.choice.price;
-                const total = this.default_total * this.quantity;
-                this.total = total;
-            }
         } else {
             this.add.unshift(context);
             const add = this.quantity * context.price;
@@ -223,15 +213,16 @@ export default class DetailScreen extends Vue {
         }
     }
 
-    addCart() {
+    addCart(args: Product) {
         this.$store.commit("add", {
             id: this.productmodules.cart.length + 1,
-            img:
-                "https://www.pngall.com/wp-content/uploads/2016/05/Pizza-Download-PNG.png",
-            name: "Pizza",
+            img: args.img,
+            name: args.name,
             total: this.total,
-            quantity: this.quantity
+            quantity: this.quantity,
+            tooping: this.add
         });
+        this.$store.commit("record", true);
     }
 
     clickrouter() {
@@ -248,6 +239,34 @@ export default class DetailScreen extends Vue {
         });
         this.default_total = this.defaultmodules.choice.price;
         this.total = this.default_total;
+    }
+    beforeUpdate() {
+        if (this.productmodules.cart[0]) {
+            let data = [],
+                child_data: Product = {};
+            child_data = this.productmodules.data;
+            data = this.productmodules.cart;
+            const load_data: Cart = data.filter(function(x) {
+                if (x.name === child_data.name) {
+                    return x;
+                }
+            })[0];
+            if (load_data) {
+                if (this.defaultmodules.record) {
+                    this.add = load_data.tooping;
+                    this.$store.commit("detail", load_data);
+                }
+            } else {
+                if (this.defaultmodules.updated) {
+                    this.add = [];
+                    this.total = this.defaultmodules.choice.price;
+                    this.$store.commit("updated", false);
+                }
+            }
+        }
+    }
+    updated() {
+        this.$store.commit("record", false);
     }
 }
 </script>

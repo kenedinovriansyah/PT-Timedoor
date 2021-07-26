@@ -3,18 +3,14 @@
         <div class="grids">
             <div
                 class="card"
-                v-for="(items, index) in array"
+                v-for="(items, index) in product.product"
                 :key="index"
-                @click="clickrouter('pizza-hut')"
             >
                 <div class="card-image">
-                    <img
-                        src="https://www.pngall.com/wp-content/uploads/2016/05/Pizza-Download-PNG.png"
-                        alt=""
-                    />
+                    <img :src="items.img" alt="" />
                 </div>
                 <div class="card-body">
-                    <span class="name">Pizza Hut, Marrakech</span>
+                    <span class="name">{{ items.name }}</span>
                     <div class="description">
                         Extra-virgin olive oil, garlic, mozzarella, mushrooms
                         and olives.
@@ -27,7 +23,7 @@
                     <div class="groups">
                         <div
                             class="group"
-                            @click="clickrouter('piza-hut', 22, 8)"
+                            @click="clickrouter(items.name, 22, 8)"
                         >
                             <div class="box">
                                 <span>22</span>
@@ -39,7 +35,7 @@
                         </div>
                         <div
                             class="group"
-                            @click="clickrouter('piza-hut', 29, 10)"
+                            @click="clickrouter(items.name, 29, 10)"
                         >
                             <div class="box">
                                 <span>29</span>
@@ -51,7 +47,7 @@
                         </div>
                         <div
                             class="group"
-                            @click="clickrouter('piza-hut', 32, 12)"
+                            @click="clickrouter(items.name, 32, 12)"
                         >
                             <div class="box">
                                 <span>32</span>
@@ -62,28 +58,48 @@
                             </div>
                         </div>
                     </div>
-                    <div class="card-button">
+                    <div class="card-button" @click="clickChoice(items)">
                         <button>
-                            Add To Cart
+                            Choice
                         </button>
                     </div>
                 </div>
             </div>
         </div>
+        <DetailScreen />
     </div>
 </template>
 
 <script lang="ts">
 import Vue from "vue";
 import { Component } from "vue-property-decorator";
+import { mapGetters, mapState } from "vuex";
+import { Product } from "../../store/types/interface";
+import DetailScreen from "./detail.screen.vue";
 
-@Component({})
+@Component({
+    components: { DetailScreen },
+    computed: {
+        ...mapGetters(["product"]),
+        ...mapState(["productmodules"])
+    }
+})
 export default class HomeScreen extends Vue {
-    array = [0, 1, 2];
     choice = -1;
+    productmodules: any;
 
     click(index: number) {
         this.choice = index;
+    }
+
+    clickChoice(args: Product) {
+        const cart = this.productmodules.cart.filter(function(x) {
+            return x.name === args.name;
+        })[0];
+        if (!cart) {
+            this.$store.commit("updated", true);
+        }
+        this.$store.commit("detail", args);
     }
 
     clickrouter(name: string, size: number, price: number) {
@@ -91,6 +107,12 @@ export default class HomeScreen extends Vue {
             this.$store.commit("choice", { size: size, price: price });
             localStorage.setItem("size", size.toString());
             localStorage.setItem("price", price.toString());
+        }
+        const cart = this.productmodules.cart.filter(function(x) {
+            return x.name === name;
+        })[0];
+        if (!cart) {
+            this.$store.commit("updated", true);
         }
         this.$router.push({
             name: "detail",

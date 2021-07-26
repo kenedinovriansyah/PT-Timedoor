@@ -25897,7 +25897,6 @@ var DetailScreen = function (_super) {
     _this.quantity = 1;
     _this.total = 32;
     _this.default_total = 32;
-    _this.record = true;
     _this.array = [{
       name: "Avocado",
       price: 1
@@ -25969,21 +25968,13 @@ var DetailScreen = function (_super) {
       var filter = this.add.filter(function (x) {
         return x.name === context.name;
       })[0];
-      var t_quan = filter.price * this.quantity;
-      this.default_total = this.default_total - t_quan;
+      var t_q = filter.price * this.quantity;
+      this.total = this.total - t_q;
       this.add = this.add.filter(function (x) {
         if (x.name !== context.name) {
           return x;
         }
       });
-
-      if (this.add[0]) {
-        this.total = this.default_total;
-      } else {
-        this.default_total = this.defaultmodules.choice.price;
-        var total = this.default_total * this.quantity;
-        this.total = total;
-      }
     } else {
       this.add.unshift(context);
       var add = this.quantity * context.price;
@@ -25992,14 +25983,16 @@ var DetailScreen = function (_super) {
     }
   };
 
-  DetailScreen.prototype.addCart = function () {
+  DetailScreen.prototype.addCart = function (args) {
     this.$store.commit("add", {
       id: this.productmodules.cart.length + 1,
-      img: "https://www.pngall.com/wp-content/uploads/2016/05/Pizza-Download-PNG.png",
-      name: "Pizza",
+      img: args.img,
+      name: args.name,
       total: this.total,
-      quantity: this.quantity
+      quantity: this.quantity,
+      tooping: this.add
     });
+    this.$store.commit("record", true);
   };
 
   DetailScreen.prototype.clickrouter = function () {
@@ -26016,6 +26009,37 @@ var DetailScreen = function (_super) {
     });
     this.default_total = this.defaultmodules.choice.price;
     this.total = this.default_total;
+  };
+
+  DetailScreen.prototype.beforeUpdate = function () {
+    if (this.productmodules.cart[0]) {
+      var data = [],
+          child_data_1 = {};
+      child_data_1 = this.productmodules.data;
+      data = this.productmodules.cart;
+      var load_data = data.filter(function (x) {
+        if (x.name === child_data_1.name) {
+          return x;
+        }
+      })[0];
+
+      if (load_data) {
+        if (this.defaultmodules.record) {
+          this.add = load_data.tooping;
+          this.$store.commit("detail", load_data);
+        }
+      } else {
+        if (this.defaultmodules.updated) {
+          this.add = [];
+          this.total = this.defaultmodules.choice.price;
+          this.$store.commit("updated", false);
+        }
+      }
+    }
+  };
+
+  DetailScreen.prototype.updated = function () {
+    this.$store.commit("record", false);
   };
 
   DetailScreen = __decorate([vue_property_decorator_1.Component({
@@ -26046,6 +26070,10 @@ __webpack_require__(/*! core-js/modules/es.object.create.js */ "./node_modules/c
 __webpack_require__(/*! core-js/modules/es.object.get-own-property-descriptor.js */ "./node_modules/core-js/modules/es.object.get-own-property-descriptor.js");
 
 __webpack_require__(/*! core-js/modules/es.object.define-property.js */ "./node_modules/core-js/modules/es.object.define-property.js");
+
+__webpack_require__(/*! core-js/modules/es.array.filter.js */ "./node_modules/core-js/modules/es.array.filter.js");
+
+__webpack_require__(/*! core-js/modules/es.function.name.js */ "./node_modules/core-js/modules/es.function.name.js");
 
 __webpack_require__(/*! core-js/modules/es.date.to-string.js */ "./node_modules/core-js/modules/es.date.to-string.js");
 
@@ -26081,6 +26109,22 @@ var __extends = this && this.__extends || function () {
   };
 }();
 
+var __assign = this && this.__assign || function () {
+  __assign = Object.assign || function (t) {
+    for (var s, i = 1, n = arguments.length; i < n; i++) {
+      s = arguments[i];
+
+      for (var p in s) {
+        if (Object.prototype.hasOwnProperty.call(s, p)) t[p] = s[p];
+      }
+    }
+
+    return t;
+  };
+
+  return __assign.apply(this, arguments);
+};
+
 var __decorate = this && this.__decorate || function (decorators, target, key, desc) {
   var c = arguments.length,
       r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc,
@@ -26105,19 +26149,34 @@ var vue_1 = __importDefault(__webpack_require__(/*! vue */ "./node_modules/vue/d
 
 var vue_property_decorator_1 = __webpack_require__(/*! vue-property-decorator */ "./node_modules/vue-property-decorator/lib/index.js");
 
+var vuex_1 = __webpack_require__(/*! vuex */ "./node_modules/vuex/dist/vuex.esm.js");
+
+var detail_screen_vue_1 = __importDefault(__webpack_require__(/*! ./detail.screen.vue */ "./resources/js/components/screen/detail.screen.vue"));
+
 var HomeScreen = function (_super) {
   __extends(HomeScreen, _super);
 
   function HomeScreen() {
     var _this = _super !== null && _super.apply(this, arguments) || this;
 
-    _this.array = [0, 1, 2];
     _this.choice = -1;
     return _this;
   }
 
   HomeScreen.prototype.click = function (index) {
     this.choice = index;
+  };
+
+  HomeScreen.prototype.clickChoice = function (args) {
+    var cart = this.productmodules.cart.filter(function (x) {
+      return x.name === args.name;
+    })[0];
+
+    if (!cart) {
+      this.$store.commit("updated", true);
+    }
+
+    this.$store.commit("detail", args);
   };
 
   HomeScreen.prototype.clickrouter = function (name, size, price) {
@@ -26130,6 +26189,14 @@ var HomeScreen = function (_super) {
       localStorage.setItem("price", price.toString());
     }
 
+    var cart = this.productmodules.cart.filter(function (x) {
+      return x.name === name;
+    })[0];
+
+    if (!cart) {
+      this.$store.commit("updated", true);
+    }
+
     this.$router.push({
       name: "detail",
       params: {
@@ -26138,7 +26205,12 @@ var HomeScreen = function (_super) {
     });
   };
 
-  HomeScreen = __decorate([vue_property_decorator_1.Component({})], HomeScreen);
+  HomeScreen = __decorate([vue_property_decorator_1.Component({
+    components: {
+      DetailScreen: detail_screen_vue_1["default"]
+    },
+    computed: __assign(__assign({}, vuex_1.mapGetters(["product"])), vuex_1.mapState(["productmodules"]))
+  })], HomeScreen);
   return HomeScreen;
 }(vue_1["default"]);
 
@@ -26294,13 +26366,21 @@ var state = {
   choice: {
     size: 0,
     price: 0
-  }
+  },
+  updated: true,
+  record: false
 };
 var actions = {};
 var mutations = {
   choice: function choice(args, context) {
     args.choice.size = context.size;
     args.choice.price = context.price;
+  },
+  updated: function updated(args, context) {
+    return args.updated = context;
+  },
+  record: function record(args, context) {
+    return args.record = context;
   }
 };
 var getters = {
@@ -26330,22 +26410,43 @@ __webpack_require__(/*! core-js/modules/es.object.define-property.js */ "./node_
 
 __webpack_require__(/*! core-js/modules/es.array.filter.js */ "./node_modules/core-js/modules/es.array.filter.js");
 
+__webpack_require__(/*! core-js/modules/es.function.name.js */ "./node_modules/core-js/modules/es.function.name.js");
+
 Object.defineProperty(exports, "__esModule", ({
   value: true
 }));
 var state = {
   cart: [],
-  product: []
+  product: [{
+    name: "Italino Original",
+    description: "Although the legendary Double Burger really needs no introduction, please allow us... Tucked in between three soft buns are two all-beef patties, cheddar cheese, ketchup, onion, pickles and iceberg lettuce. Hesburger’s own paprika and cucumber mayonnaise add the crowning touch. Oh baby!",
+    img: "https://ths.cafe/wp-content/uploads/2021/01/THS-Special-Pizza-The-Hunger-Solution.png"
+  }, {
+    name: "Chiken Hawaii",
+    description: "Although the legendary Double Burger really needs no introduction, please allow us... Tucked in between three soft buns are two all-beef patties, cheddar cheese, ketchup, onion, pickles and iceberg lettuce. Hesburger’s own paprika and cucumber mayonnaise add the crowning touch. Oh baby!",
+    img: "https://i.dlpng.com/static/png/6699618_preview.png"
+  }, {
+    name: "Summer Pizza",
+    description: "Although the legendary Double Burger really needs no introduction, please allow us... Tucked in between three soft buns are two all-beef patties, cheddar cheese, ketchup, onion, pickles and iceberg lettuce. Hesburger’s own paprika and cucumber mayonnaise add the crowning touch. Oh baby!",
+    img: "https://www.pngall.com/wp-content/uploads/2016/05/Pizza-Download-PNG.png"
+  }],
+  data: {}
 };
 var actions = {};
 var mutations = {
   add: function add(args, context) {
+    args.cart = args.cart.filter(function (x) {
+      return x.name !== context.name;
+    });
     args.cart.unshift(context);
   },
   remove: function remove(args, context) {
     args.cart = args.cart.filter(function (x) {
       return x.id !== context.id;
     });
+  },
+  detail: function detail(args, context) {
+    args.data = context;
   }
 };
 var getters = {
@@ -26430,7 +26531,7 @@ __webpack_require__.r(__webpack_exports__);
 
 var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_0___default()(function(i){return i[1]});
 // Module
-___CSS_LOADER_EXPORT___.push([module.id, ".info[data-v-a4594bcc] {\n  position: fixed;\n  bottom: 60px;\n  right: 60px;\n}\n.info .floating[data-v-a4594bcc] {\n  position: relative;\n  transition: 500ms ease-in-out;\n}\n.info button[data-v-a4594bcc] {\n  width: 50px;\n  height: 50px;\n  border-radius: 100%;\n  background-color: #00ab55;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  box-shadow: rgba(0, 0, 0, 0.07) 0px 4px 6px -1px;\n  -webkit-box-shadow: rgba(0, 0, 0, 0.07) 0px 4px 6px -1px;\n  -moz-box-shadow: rgba(0, 0, 0, 0.07) 0px 4px 6px -1px;\n  border: none;\n  outline: none;\n}\n.info .icons[data-v-a4594bcc] {\n  width: 20px;\n  height: 20px;\n  fill: white;\n}\n.hidden[data-v-a4594bcc] {\n  display: none;\n  visibility: hidden;\n}\n.dropdown[data-v-a4594bcc] {\n  width: 280px;\n  height: 360px;\n  background-color: white;\n  box-shadow: rgba(0, 0, 0, 0.07) 0px 4px 6px -1px;\n  -webkit-box-shadow: rgba(0, 0, 0, 0.07) 0px 4px 6px -1px;\n  -moz-box-shadow: rgba(0, 0, 0, 0.07) 0px 4px 6px -1px;\n  position: absolute;\n  border-radius: 15px;\n  transform: translate(-50%, -50%);\n  -webkit-animation: dropdown-data-v-a4594bcc 1s forwards;\n          animation: dropdown-data-v-a4594bcc 1s forwards;\n  overflow: hidden;\n}\n.dropdown .dropdown-body[data-v-a4594bcc] {\n  display: flex;\n  flex-direction: column;\n  padding: 10px;\n  height: 70%;\n  overflow-y: auto;\n  border-bottom: solid 1px #c9d1d9;\n  /* width */\n  /* Track */\n  /* Handle */\n  /* Handle on hover */\n}\n.dropdown .dropdown-body[data-v-a4594bcc]::-webkit-scrollbar {\n  width: 1px;\n}\n.dropdown .dropdown-body[data-v-a4594bcc]::-webkit-scrollbar-track {\n  background: #f1f1f1;\n}\n.dropdown .dropdown-body[data-v-a4594bcc]::-webkit-scrollbar-thumb {\n  background: #888;\n}\n.dropdown .dropdown-body[data-v-a4594bcc]::-webkit-scrollbar-thumb:hover {\n  background: #555;\n}\n.dropdown .dropdown-footer[data-v-a4594bcc] {\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  font-family: \"Kanit\", sans-serif;\n  padding: 13px 15px 13px 15px;\n}\n.dropdown .cart[data-v-a4594bcc] {\n  display: flex;\n  align-items: center;\n  transition: 500ms ease-in-out;\n  border-bottom: solid 1px #c9d1d9;\n  padding: 3px 0px 3px 0px;\n  font-family: \"Public Sans\", sans-serif;\n  font-size: 13.333px;\n}\n.dropdown .cart[data-v-a4594bcc]:hover {\n  background-color: #42424230;\n  padding: 5px 10px 5px 10px;\n  margin: 5px 0px 5px 0px;\n  border-radius: 15px;\n  cursor: pointer;\n}\n.dropdown .cart .cart-image[data-v-a4594bcc] {\n  width: 32px;\n  height: 32px;\n  margin: 0px 5px 0px 5px;\n}\n.dropdown .cart .cart-image img[data-v-a4594bcc] {\n  width: 100%;\n  height: 100%;\n  background-size: 100% 100%;\n  background-position: center;\n  background-repeat: no-repeat;\n}\n.dropdown .cart .name[data-v-a4594bcc] {\n  width: 140px;\n  padding: 0px 5px 0px 5px;\n  color: rgba(49, 53, 59, 0.68);\n}\n.dropdown .cart .quantity[data-v-a4594bcc] {\n  margin: 0px 10px 0px 10px;\n}\n.dropdown .cart .quantity[data-v-a4594bcc],\n.dropdown .cart .total[data-v-a4594bcc] {\n  font-family: \"Kanit\", sans-serif;\n}\n.btn-buy[data-v-a4594bcc] {\n  position: absolute;\n  bottom: 0;\n  width: 100% !important;\n  height: 40px !important;\n  border-radius: 0px !important;\n  font-family: \"Public Sans\", sans-serif !important;\n  color: white !important;\n}\n@-webkit-keyframes dropdown-data-v-a4594bcc {\nfrom {\n    opacity: 0;\n    top: -50%;\n    left: -50%;\n}\nto {\n    opacity: 1;\n    top: -260%;\n    left: -300%;\n}\n}\n@keyframes dropdown-data-v-a4594bcc {\nfrom {\n    opacity: 0;\n    top: -50%;\n    left: -50%;\n}\nto {\n    opacity: 1;\n    top: -260%;\n    left: -300%;\n}\n}", ""]);
+___CSS_LOADER_EXPORT___.push([module.id, ".info[data-v-a4594bcc] {\n  position: fixed;\n  bottom: 60px;\n  right: 60px;\n  z-index: 2;\n}\n.info .floating[data-v-a4594bcc] {\n  position: relative;\n  transition: 500ms ease-in-out;\n}\n.info button[data-v-a4594bcc] {\n  width: 50px;\n  height: 50px;\n  border-radius: 100%;\n  background-color: #00ab55;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  box-shadow: rgba(0, 0, 0, 0.07) 0px 4px 6px -1px;\n  -webkit-box-shadow: rgba(0, 0, 0, 0.07) 0px 4px 6px -1px;\n  -moz-box-shadow: rgba(0, 0, 0, 0.07) 0px 4px 6px -1px;\n  border: none;\n  outline: none;\n}\n.info .icons[data-v-a4594bcc] {\n  width: 20px;\n  height: 20px;\n  fill: white;\n}\n.hidden[data-v-a4594bcc] {\n  display: none;\n  visibility: hidden;\n}\n.dropdown[data-v-a4594bcc] {\n  width: 280px;\n  height: 360px;\n  background-color: white;\n  box-shadow: rgba(0, 0, 0, 0.07) 0px 4px 6px -1px;\n  -webkit-box-shadow: rgba(0, 0, 0, 0.07) 0px 4px 6px -1px;\n  -moz-box-shadow: rgba(0, 0, 0, 0.07) 0px 4px 6px -1px;\n  position: absolute;\n  border-radius: 15px;\n  transform: translate(-50%, -50%);\n  -webkit-animation: dropdown-data-v-a4594bcc 1s forwards;\n          animation: dropdown-data-v-a4594bcc 1s forwards;\n  overflow: hidden;\n}\n.dropdown .dropdown-body[data-v-a4594bcc] {\n  display: flex;\n  flex-direction: column;\n  padding: 10px;\n  height: 70%;\n  overflow-y: auto;\n  border-bottom: solid 1px #c9d1d9;\n  /* width */\n  /* Track */\n  /* Handle */\n  /* Handle on hover */\n}\n.dropdown .dropdown-body[data-v-a4594bcc]::-webkit-scrollbar {\n  width: 1px;\n}\n.dropdown .dropdown-body[data-v-a4594bcc]::-webkit-scrollbar-track {\n  background: #f1f1f1;\n}\n.dropdown .dropdown-body[data-v-a4594bcc]::-webkit-scrollbar-thumb {\n  background: #888;\n}\n.dropdown .dropdown-body[data-v-a4594bcc]::-webkit-scrollbar-thumb:hover {\n  background: #555;\n}\n.dropdown .dropdown-footer[data-v-a4594bcc] {\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  font-family: \"Kanit\", sans-serif;\n  padding: 13px 15px 13px 15px;\n}\n.dropdown .cart[data-v-a4594bcc] {\n  display: flex;\n  align-items: center;\n  transition: 500ms ease-in-out;\n  border-bottom: solid 1px #c9d1d9;\n  padding: 3px 0px 3px 0px;\n  font-family: \"Public Sans\", sans-serif;\n  font-size: 13.333px;\n}\n.dropdown .cart[data-v-a4594bcc]:hover {\n  background-color: #42424230;\n  padding: 5px 10px 5px 10px;\n  margin: 5px 0px 5px 0px;\n  border-radius: 15px;\n  cursor: pointer;\n}\n.dropdown .cart .cart-image[data-v-a4594bcc] {\n  width: 32px;\n  height: 32px;\n  margin: 0px 5px 0px 5px;\n}\n.dropdown .cart .cart-image img[data-v-a4594bcc] {\n  width: 100%;\n  height: 100%;\n  background-size: 100% 100%;\n  background-position: center;\n  background-repeat: no-repeat;\n}\n.dropdown .cart .name[data-v-a4594bcc] {\n  width: 140px;\n  padding: 0px 5px 0px 5px;\n  color: rgba(49, 53, 59, 0.68);\n}\n.dropdown .cart .quantity[data-v-a4594bcc] {\n  margin: 0px 10px 0px 10px;\n}\n.dropdown .cart .quantity[data-v-a4594bcc],\n.dropdown .cart .total[data-v-a4594bcc] {\n  font-family: \"Kanit\", sans-serif;\n}\n.btn-buy[data-v-a4594bcc] {\n  position: absolute;\n  bottom: 0;\n  width: 100% !important;\n  height: 40px !important;\n  border-radius: 0px !important;\n  font-family: \"Public Sans\", sans-serif !important;\n  color: white !important;\n}\n@-webkit-keyframes dropdown-data-v-a4594bcc {\nfrom {\n    opacity: 0;\n    top: -50%;\n    left: -50%;\n}\nto {\n    opacity: 1;\n    top: -260%;\n    left: -300%;\n}\n}\n@keyframes dropdown-data-v-a4594bcc {\nfrom {\n    opacity: 0;\n    top: -50%;\n    left: -50%;\n}\nto {\n    opacity: 1;\n    top: -260%;\n    left: -300%;\n}\n}", ""]);
 // Exports
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
 
@@ -27469,248 +27570,242 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c("div", { staticClass: "detail" }, [
-    _c("div", { staticClass: "page-header" }, [
-      _c(
-        "button",
-        {
-          on: {
-            click: function($event) {
-              return _vm.clickrouter()
-            }
-          }
-        },
-        [
-          _c("i", { staticClass: "fas fa-arrow-left" }),
-          _vm._v(" "),
-          _c("span", [_vm._v("Back To Home")])
-        ]
-      )
-    ]),
-    _vm._v(" "),
-    _c("div", { staticClass: "grids" }, [
-      _vm._m(0),
-      _vm._v(" "),
-      _c("div", { staticClass: "cols" }, [
-        _c("div", { staticClass: "piza-card" }, [
-          _vm._m(1),
-          _vm._v(" "),
-          _c("div", { staticClass: "piza-card-body" }, [
-            _c("div", { staticClass: "piza-card-cols" }, [
-              _c("h6", [_vm._v("Select Crust")]),
-              _vm._v(" "),
+  return _vm.product.data.name
+    ? _c("div", { staticClass: "detail" }, [
+        _vm.$route.name !== "home"
+          ? _c("div", { staticClass: "page-header" }, [
               _c(
-                "ul",
-                _vm._l(_vm.array, function(items, index) {
-                  return _c(
-                    "li",
-                    {
-                      key: index,
-                      on: {
-                        click: function($event) {
-                          return _vm.addToppings(items)
-                        }
-                      }
-                    },
-                    [
-                      _c("div", { staticClass: "group" }, [
-                        _c("div", {
-                          class: _vm.add.filter(function(x) {
-                            return x.name.indexOf(items.name) > -1
-                          })[0]
-                            ? "box active"
-                            : "box"
-                        }),
-                        _vm._v(" "),
-                        _c("span", [_vm._v(_vm._s(items.name))])
-                      ])
-                    ]
-                  )
-                }),
-                0
+                "button",
+                {
+                  on: {
+                    click: function($event) {
+                      return _vm.clickrouter()
+                    }
+                  }
+                },
+                [
+                  _c("i", { staticClass: "fas fa-arrow-left" }),
+                  _vm._v(" "),
+                  _c("span", [_vm._v("Back To Home")])
+                ]
               )
-            ]),
-            _vm._v(" "),
-            _c("div", { staticClass: "piza-card-cols" }, [
-              _c("h6", [_vm._v("Select Size")]),
+            ])
+          : _vm._e(),
+        _vm._v(" "),
+        _c("div", { staticClass: "grids" }, [
+          _c("div", { staticClass: "cols" }, [
+            _c("img", { attrs: { src: _vm.product.data.img, alt: "" } })
+          ]),
+          _vm._v(" "),
+          _c("div", { staticClass: "cols" }, [
+            _c("div", { staticClass: "piza-card" }, [
+              _c("div", { staticClass: "piza-card-header" }, [
+                _c("h2", { staticClass: "name" }, [
+                  _vm._v(_vm._s(_vm.product.data.name))
+                ]),
+                _vm._v(" "),
+                _c("span", { staticClass: "description" }, [
+                  _vm._v(
+                    "Mouth watering pepperoni, cabanossi, mushroom,\n                        capsicum, black olives and stretchy mozzarella,\n                        seasoned with garlic and oregano.\n                    "
+                  )
+                ])
+              ]),
               _vm._v(" "),
-              _c("ul", [
-                _c("li", [
-                  _c("div", { staticClass: "group" }, [
-                    _c(
-                      "div",
-                      {
-                        class:
-                          _vm.defaults.choice.price === 8
-                            ? "box-s active"
-                            : "box-s",
-                        on: {
-                          click: function($event) {
-                            return _vm.choiceSize(22, 8)
+              _c("div", { staticClass: "piza-card-body" }, [
+                _c("div", { staticClass: "piza-card-cols" }, [
+                  _c("h6", [_vm._v("Select Crust")]),
+                  _vm._v(" "),
+                  _c(
+                    "ul",
+                    _vm._l(_vm.array, function(items, index) {
+                      return _c(
+                        "li",
+                        {
+                          key: index,
+                          on: {
+                            click: function($event) {
+                              return _vm.addToppings(items)
+                            }
                           }
-                        }
-                      },
-                      [
-                        _c("span", [_vm._v("22")]),
-                        _vm._v(" "),
-                        _c("span", [_vm._v("cm")])
-                      ]
-                    ),
-                    _vm._v(" "),
-                    _c("div", { staticClass: "price" }, [
-                      _vm._v(
-                        "\n                                        $8\n                                    "
+                        },
+                        [
+                          _c("div", { staticClass: "group" }, [
+                            _c("div", {
+                              class: _vm.add.filter(function(x) {
+                                return x.name.indexOf(items.name) > -1
+                              })[0]
+                                ? "box active"
+                                : "box"
+                            }),
+                            _vm._v(" "),
+                            _c("span", [_vm._v(_vm._s(items.name))])
+                          ])
+                        ]
                       )
-                    ])
-                  ])
+                    }),
+                    0
+                  )
                 ]),
                 _vm._v(" "),
-                _c("li", [
-                  _c("div", { staticClass: "group" }, [
-                    _c(
-                      "div",
-                      {
-                        class:
-                          _vm.defaults.choice.price === 10
-                            ? "box-s active"
-                            : "box-s",
-                        on: {
-                          click: function($event) {
-                            return _vm.choiceSize(29, 10)
-                          }
-                        }
-                      },
-                      [
-                        _c("span", [_vm._v("29")]),
+                _c("div", { staticClass: "piza-card-cols" }, [
+                  _c("h6", [_vm._v("Select Size")]),
+                  _vm._v(" "),
+                  _c("ul", [
+                    _c("li", [
+                      _c("div", { staticClass: "group" }, [
+                        _c(
+                          "div",
+                          {
+                            class:
+                              _vm.defaults.choice.price === 8
+                                ? "box-s active"
+                                : "box-s",
+                            on: {
+                              click: function($event) {
+                                return _vm.choiceSize(22, 8)
+                              }
+                            }
+                          },
+                          [
+                            _c("span", [_vm._v("22")]),
+                            _vm._v(" "),
+                            _c("span", [_vm._v("cm")])
+                          ]
+                        ),
                         _vm._v(" "),
-                        _c("span", [_vm._v("cm")])
-                      ]
-                    ),
+                        _c("div", { staticClass: "price" }, [
+                          _vm._v(
+                            "\n                                        $8\n                                    "
+                          )
+                        ])
+                      ])
+                    ]),
                     _vm._v(" "),
-                    _c("div", { staticClass: "price" }, [
-                      _vm._v(
-                        "\n                                        $10\n                                    "
-                      )
-                    ])
-                  ])
-                ]),
-                _vm._v(" "),
-                _c("li", [
-                  _c("div", { staticClass: "group" }, [
-                    _c(
-                      "div",
-                      {
-                        class:
-                          _vm.defaults.choice.price === 12
-                            ? "box-s active"
-                            : "box-s",
-                        on: {
-                          click: function($event) {
-                            return _vm.choiceSize(32, 12)
-                          }
-                        }
-                      },
-                      [
-                        _c("span", [_vm._v("32")]),
+                    _c("li", [
+                      _c("div", { staticClass: "group" }, [
+                        _c(
+                          "div",
+                          {
+                            class:
+                              _vm.defaults.choice.price === 10
+                                ? "box-s active"
+                                : "box-s",
+                            on: {
+                              click: function($event) {
+                                return _vm.choiceSize(29, 10)
+                              }
+                            }
+                          },
+                          [
+                            _c("span", [_vm._v("29")]),
+                            _vm._v(" "),
+                            _c("span", [_vm._v("cm")])
+                          ]
+                        ),
                         _vm._v(" "),
-                        _c("span", [_vm._v("cm")])
-                      ]
-                    ),
+                        _c("div", { staticClass: "price" }, [
+                          _vm._v(
+                            "\n                                        $10\n                                    "
+                          )
+                        ])
+                      ])
+                    ]),
                     _vm._v(" "),
-                    _c("div", { staticClass: "price" }, [
-                      _vm._v(
-                        "\n                                        $12\n                                    "
-                      )
+                    _c("li", [
+                      _c("div", { staticClass: "group" }, [
+                        _c(
+                          "div",
+                          {
+                            class:
+                              _vm.defaults.choice.price === 12
+                                ? "box-s active"
+                                : "box-s",
+                            on: {
+                              click: function($event) {
+                                return _vm.choiceSize(32, 12)
+                              }
+                            }
+                          },
+                          [
+                            _c("span", [_vm._v("32")]),
+                            _vm._v(" "),
+                            _c("span", [_vm._v("cm")])
+                          ]
+                        ),
+                        _vm._v(" "),
+                        _c("div", { staticClass: "price" }, [
+                          _vm._v(
+                            "\n                                        $12\n                                    "
+                          )
+                        ])
+                      ])
                     ])
                   ])
                 ])
+              ]),
+              _vm._v(" "),
+              _c("h6", [_vm._v("Quantity")]),
+              _vm._v(" "),
+              _c("div", { staticClass: "buttons" }, [
+                _c(
+                  "div",
+                  { staticClass: "field", attrs: { id: "field-input" } },
+                  [
+                    _c("input", {
+                      attrs: {
+                        type: "number",
+                        name: "number",
+                        id: "number",
+                        placeholder: "Quantity",
+                        autocomplete: "off",
+                        min: "1"
+                      },
+                      domProps: { value: _vm.quantity },
+                      on: {
+                        input: function($event) {
+                          return _vm.clickquantity($event)
+                        }
+                      }
+                    })
+                  ]
+                ),
+                _vm._v(" "),
+                _c(
+                  "button",
+                  {
+                    on: {
+                      click: function($event) {
+                        return _vm.addCart(_vm.product.data)
+                      }
+                    }
+                  },
+                  [
+                    _c("icons", {
+                      staticClass: "icons",
+                      attrs: { src: _vm.cart }
+                    }),
+                    _vm._v(" "),
+                    _c("span", [_vm._v("Add to cart")])
+                  ],
+                  1
+                )
+              ]),
+              _vm._v(" "),
+              _c("div", { staticClass: "total" }, [
+                _c("span", [_vm._v("Total")]),
+                _vm._v(
+                  "\n                    $" +
+                    _vm._s(_vm.total) +
+                    "\n                "
+                )
               ])
             ])
-          ]),
-          _vm._v(" "),
-          _c("h6", [_vm._v("Quantity")]),
-          _vm._v(" "),
-          _c("div", { staticClass: "buttons" }, [
-            _c("div", { staticClass: "field", attrs: { id: "field-input" } }, [
-              _c("input", {
-                attrs: {
-                  type: "number",
-                  name: "number",
-                  id: "number",
-                  placeholder: "Quantity",
-                  autocomplete: "off",
-                  min: "1"
-                },
-                domProps: { value: _vm.quantity },
-                on: {
-                  input: function($event) {
-                    return _vm.clickquantity($event)
-                  }
-                }
-              })
-            ]),
-            _vm._v(" "),
-            _c(
-              "button",
-              {
-                on: {
-                  click: function($event) {
-                    return _vm.addCart()
-                  }
-                }
-              },
-              [
-                _c("icons", { staticClass: "icons", attrs: { src: _vm.cart } }),
-                _vm._v(" "),
-                _c("span", [_vm._v("Add to cart")])
-              ],
-              1
-            )
-          ]),
-          _vm._v(" "),
-          _c("div", { staticClass: "total" }, [
-            _c("span", [_vm._v("Total")]),
-            _vm._v(
-              "\n                    $" +
-                _vm._s(_vm.total) +
-                "\n                "
-            )
           ])
         ])
       ])
-    ])
-  ])
+    : _vm._e()
 }
-var staticRenderFns = [
-  function() {
-    var _vm = this
-    var _h = _vm.$createElement
-    var _c = _vm._self._c || _h
-    return _c("div", { staticClass: "cols" }, [
-      _c("img", {
-        attrs: {
-          src:
-            "https://www.pngall.com/wp-content/uploads/2016/05/Pizza-Download-PNG.png",
-          alt: ""
-        }
-      })
-    ])
-  },
-  function() {
-    var _vm = this
-    var _h = _vm.$createElement
-    var _c = _vm._self._c || _h
-    return _c("div", { staticClass: "piza-card-header" }, [
-      _c("h2", { staticClass: "name" }, [_vm._v("Hawaii Vegetarian Pizza")]),
-      _vm._v(" "),
-      _c("span", { staticClass: "description" }, [
-        _vm._v(
-          "Mouth watering pepperoni, cabanossi, mushroom,\n                        capsicum, black olives and stretchy mozzarella,\n                        seasoned with garlic and oregano.\n                    "
-        )
-      ])
-    ])
-  }
-]
+var staticRenderFns = []
 render._withStripped = true
 
 
@@ -27733,26 +27828,30 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c("div", { staticClass: "home" }, [
-    _c(
-      "div",
-      { staticClass: "grids" },
-      _vm._l(_vm.array, function(items, index) {
-        return _c(
-          "div",
-          {
-            key: index,
-            staticClass: "card",
-            on: {
-              click: function($event) {
-                return _vm.clickrouter("pizza-hut")
-              }
-            }
-          },
-          [
-            _vm._m(0, true),
+  return _c(
+    "div",
+    { staticClass: "home" },
+    [
+      _c(
+        "div",
+        { staticClass: "grids" },
+        _vm._l(_vm.product.product, function(items, index) {
+          return _c("div", { key: index, staticClass: "card" }, [
+            _c("div", { staticClass: "card-image" }, [
+              _c("img", { attrs: { src: items.img, alt: "" } })
+            ]),
             _vm._v(" "),
-            _vm._m(1, true),
+            _c("div", { staticClass: "card-body" }, [
+              _c("span", { staticClass: "name" }, [_vm._v(_vm._s(items.name))]),
+              _vm._v(" "),
+              _c("div", { staticClass: "description" }, [
+                _vm._v(
+                  "\n                    Extra-virgin olive oil, garlic, mozzarella, mushrooms\n                    and olives.\n                "
+                )
+              ]),
+              _vm._v(" "),
+              _vm._m(0, true)
+            ]),
             _vm._v(" "),
             _c("div", { staticClass: "card-footer" }, [
               _c("div", { staticClass: "groups" }, [
@@ -27762,12 +27861,12 @@ var render = function() {
                     staticClass: "group",
                     on: {
                       click: function($event) {
-                        return _vm.clickrouter("piza-hut", 22, 8)
+                        return _vm.clickrouter(items.name, 22, 8)
                       }
                     }
                   },
                   [
-                    _vm._m(2, true),
+                    _vm._m(1, true),
                     _vm._v(" "),
                     _c("div", { staticClass: "price" }, [
                       _vm._v(
@@ -27783,12 +27882,12 @@ var render = function() {
                     staticClass: "group",
                     on: {
                       click: function($event) {
-                        return _vm.clickrouter("piza-hut", 29, 10)
+                        return _vm.clickrouter(items.name, 29, 10)
                       }
                     }
                   },
                   [
-                    _vm._m(3, true),
+                    _vm._m(2, true),
                     _vm._v(" "),
                     _c("div", { staticClass: "price" }, [
                       _vm._v(
@@ -27804,12 +27903,12 @@ var render = function() {
                     staticClass: "group",
                     on: {
                       click: function($event) {
-                        return _vm.clickrouter("piza-hut", 32, 12)
+                        return _vm.clickrouter(items.name, 32, 12)
                       }
                     }
                   },
                   [
-                    _vm._m(4, true),
+                    _vm._m(3, true),
                     _vm._v(" "),
                     _c("div", { staticClass: "price" }, [
                       _vm._v(
@@ -27820,46 +27919,42 @@ var render = function() {
                 )
               ]),
               _vm._v(" "),
-              _vm._m(5, true)
+              _c(
+                "div",
+                {
+                  staticClass: "card-button",
+                  on: {
+                    click: function($event) {
+                      return _vm.clickChoice(items)
+                    }
+                  }
+                },
+                [
+                  _c("button", [
+                    _vm._v(
+                      "\n                        Choice\n                    "
+                    )
+                  ])
+                ]
+              )
             ])
-          ]
-        )
-      }),
-      0
-    )
-  ])
+          ])
+        }),
+        0
+      ),
+      _vm._v(" "),
+      _c("DetailScreen")
+    ],
+    1
+  )
 }
 var staticRenderFns = [
   function() {
     var _vm = this
     var _h = _vm.$createElement
     var _c = _vm._self._c || _h
-    return _c("div", { staticClass: "card-image" }, [
-      _c("img", {
-        attrs: {
-          src:
-            "https://www.pngall.com/wp-content/uploads/2016/05/Pizza-Download-PNG.png",
-          alt: ""
-        }
-      })
-    ])
-  },
-  function() {
-    var _vm = this
-    var _h = _vm.$createElement
-    var _c = _vm._self._c || _h
-    return _c("div", { staticClass: "card-body" }, [
-      _c("span", { staticClass: "name" }, [_vm._v("Pizza Hut, Marrakech")]),
-      _vm._v(" "),
-      _c("div", { staticClass: "description" }, [
-        _vm._v(
-          "\n                    Extra-virgin olive oil, garlic, mozzarella, mushrooms\n                    and olives.\n                "
-        )
-      ]),
-      _vm._v(" "),
-      _c("div", { staticClass: "pick-size" }, [
-        _c("span", [_vm._v("Pick Size")])
-      ])
+    return _c("div", { staticClass: "pick-size" }, [
+      _c("span", [_vm._v("Pick Size")])
     ])
   },
   function() {
@@ -27890,16 +27985,6 @@ var staticRenderFns = [
       _c("span", [_vm._v("32")]),
       _vm._v(" "),
       _c("span", [_vm._v("cm")])
-    ])
-  },
-  function() {
-    var _vm = this
-    var _h = _vm.$createElement
-    var _c = _vm._self._c || _h
-    return _c("div", { staticClass: "card-button" }, [
-      _c("button", [
-        _vm._v("\n                        Add To Cart\n                    ")
-      ])
     ])
   }
 ]

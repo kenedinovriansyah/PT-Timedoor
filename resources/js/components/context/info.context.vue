@@ -94,6 +94,7 @@ $text: rgba(49, 53, 59, 0.68);
     position: fixed;
     bottom: 60px;
     right: 60px;
+    z-index: 2;
     .floating {
         position: relative;
         transition: 500ms ease-in-out;
