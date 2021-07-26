@@ -57,10 +57,11 @@
                                     <div class="group">
                                         <div
                                             :class="
-                                                defaults.choice.size === 22
+                                                defaults.choice.price === 8
                                                     ? 'box-s active'
                                                     : 'box-s'
                                             "
+                                            @click="choiceSize(22, 8)"
                                         >
                                             <span>22</span>
                                             <span>cm</span>
@@ -74,10 +75,11 @@
                                     <div class="group">
                                         <div
                                             :class="
-                                                defaults.choice.size === 29
+                                                defaults.choice.price === 10
                                                     ? 'box-s active'
                                                     : 'box-s'
                                             "
+                                            @click="choiceSize(29, 10)"
                                         >
                                             <span>29</span>
                                             <span>cm</span>
@@ -91,10 +93,11 @@
                                     <div class="group">
                                         <div
                                             :class="
-                                                defaults.choice.size === 32
+                                                defaults.choice.price === 12
                                                     ? 'box-s active'
                                                     : 'box-s'
                                             "
+                                            @click="choiceSize(32, 12)"
                                         >
                                             <span>32</span>
                                             <span>cm</span>
@@ -155,6 +158,7 @@ export default class DetailScreen extends Vue {
     default_total = 32;
     defaultmodules: any;
     productmodules: any;
+    record = true;
     array = [
         { name: "Avocado", price: 1 },
         { name: "Broccoli", price: 1 },
@@ -177,14 +181,40 @@ export default class DetailScreen extends Vue {
         this.quantity = value;
     }
 
+    choiceSize(size: number, price: number) {
+        this.default_total = price;
+        this.$store.commit("choice", {
+            size,
+            price
+        });
+        let total_quantity = this.quantity * this.default_total;
+        let total_topping = 0;
+        for (let i = 0; i < this.add.length; i++) {
+            total_topping += this.add[i].price;
+        }
+        total_quantity = total_topping + total_quantity;
+        this.total = total_quantity;
+    }
+
     addToppings(context: any) {
         if (this.add.filter(x => x.name === context.name)[0]) {
+            const filter = this.add.filter(function(x) {
+                return x.name === context.name;
+            })[0];
+            const t_quan = filter.price * this.quantity;
+            this.default_total = this.default_total - t_quan;
             this.add = this.add.filter(function(x) {
-                return x.name !== context.name;
+                if (x.name !== context.name) {
+                    return x;
+                }
             });
-            const price = this.quantity * context.price;
-            this.default_total = this.total - price;
-            this.total = this.default_total;
+            if (this.add[0]) {
+                this.total = this.default_total;
+            } else {
+                this.default_total = this.defaultmodules.choice.price;
+                const total = this.default_total * this.quantity;
+                this.total = total;
+            }
         } else {
             this.add.unshift(context);
             const add = this.quantity * context.price;

@@ -25897,6 +25897,7 @@ var DetailScreen = function (_super) {
     _this.quantity = 1;
     _this.total = 32;
     _this.default_total = 32;
+    _this.record = true;
     _this.array = [{
       name: "Avocado",
       price: 1
@@ -25944,16 +25945,45 @@ var DetailScreen = function (_super) {
     this.quantity = value;
   };
 
+  DetailScreen.prototype.choiceSize = function (size, price) {
+    this.default_total = price;
+    this.$store.commit("choice", {
+      size: size,
+      price: price
+    });
+    var total_quantity = this.quantity * this.default_total;
+    var total_topping = 0;
+
+    for (var i = 0; i < this.add.length; i++) {
+      total_topping += this.add[i].price;
+    }
+
+    total_quantity = total_topping + total_quantity;
+    this.total = total_quantity;
+  };
+
   DetailScreen.prototype.addToppings = function (context) {
     if (this.add.filter(function (x) {
       return x.name === context.name;
     })[0]) {
+      var filter = this.add.filter(function (x) {
+        return x.name === context.name;
+      })[0];
+      var t_quan = filter.price * this.quantity;
+      this.default_total = this.default_total - t_quan;
       this.add = this.add.filter(function (x) {
-        return x.name !== context.name;
+        if (x.name !== context.name) {
+          return x;
+        }
       });
-      var price = this.quantity * context.price;
-      this.default_total = this.total - price;
-      this.total = this.default_total;
+
+      if (this.add[0]) {
+        this.total = this.default_total;
+      } else {
+        this.default_total = this.defaultmodules.choice.price;
+        var total = this.default_total * this.quantity;
+        this.total = total;
+      }
     } else {
       this.add.unshift(context);
       var add = this.quantity * context.price;
@@ -27511,9 +27541,14 @@ var render = function() {
                       "div",
                       {
                         class:
-                          _vm.defaults.choice.size === 22
+                          _vm.defaults.choice.price === 8
                             ? "box-s active"
-                            : "box-s"
+                            : "box-s",
+                        on: {
+                          click: function($event) {
+                            return _vm.choiceSize(22, 8)
+                          }
+                        }
                       },
                       [
                         _c("span", [_vm._v("22")]),
@@ -27536,9 +27571,14 @@ var render = function() {
                       "div",
                       {
                         class:
-                          _vm.defaults.choice.size === 29
+                          _vm.defaults.choice.price === 10
                             ? "box-s active"
-                            : "box-s"
+                            : "box-s",
+                        on: {
+                          click: function($event) {
+                            return _vm.choiceSize(29, 10)
+                          }
+                        }
                       },
                       [
                         _c("span", [_vm._v("29")]),
@@ -27561,9 +27601,14 @@ var render = function() {
                       "div",
                       {
                         class:
-                          _vm.defaults.choice.size === 32
+                          _vm.defaults.choice.price === 12
                             ? "box-s active"
-                            : "box-s"
+                            : "box-s",
+                        on: {
+                          click: function($event) {
+                            return _vm.choiceSize(32, 12)
+                          }
+                        }
                       },
                       [
                         _c("span", [_vm._v("32")]),
